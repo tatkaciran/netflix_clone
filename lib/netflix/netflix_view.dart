@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:netflix_clone/src/presentation/home/home_page.dart';
 
 import 'src/widgets/widgets.dart';
 

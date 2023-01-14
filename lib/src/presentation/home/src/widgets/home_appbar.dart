@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:netflix_clone/src/constants/ui_size.dart';
-import 'package:netflix_clone/src/extensions/extensions.dart';
 import 'package:netflix_clone/src/presentation/home/src/constants/constants.dart';
 
 class HomeAppBar extends StatelessWidget {

@@ -2,8 +2,7 @@ enum GetMovies {
   upcoming,
   topRated,
   popular,
-  nowPlaying,
-  latest;
+  nowPlaying;
 
   String get path => () {
         switch (this) {
@@ -15,8 +14,18 @@ enum GetMovies {
             return "/movie/popular";
           case GetMovies.nowPlaying:
             return "/movie/now_playing";
-          case GetMovies.latest:
-            return "/movie/latest";
+        }
+      }();
+  String get label => () {
+        switch (this) {
+          case GetMovies.upcoming:
+            return "Upcoming Movies";
+          case GetMovies.topRated:
+            return "Top Rated Movies";
+          case GetMovies.popular:
+            return "Popular Movies";
+          case GetMovies.nowPlaying:
+            return "Now Playing Movies";
         }
       }();
 }

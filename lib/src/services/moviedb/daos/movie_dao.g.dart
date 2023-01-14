@@ -31,9 +31,10 @@ MovieDAO _$MovieDAOFromJson(Map<String, dynamic> json) => MovieDAO(
       productionCountries: (json['production_countries'] as List<dynamic>?)
           ?.map((e) => CountryDAO.fromJson(e as Map<String, dynamic>))
           .toList(),
-      releaseDate: json['release_date'] == null
-          ? null
-          : DateTime.parse(json['release_date'] as String),
+      releaseDate:
+          (json['release_date'] == null || json['release_date'] as String == "")
+              ? null
+              : DateTime.parse(json['release_date'] as String),
       revenue: json['revenue'] as int?,
       runtime: json['runtime'] as int?,
       spokenLanguages: (json['spoken_languages'] as List<dynamic>?)

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:netflix_clone/netflix/src/movie_db_manager/movie_db_manager_cubit.dart';
 import 'package:netflix_clone/src/constants/constants.dart';
 import 'package:netflix_clone/src/extensions/extensions.dart';
+import 'package:netflix_clone/src/services/moviedb/daos/movies_dao.dart';
+import 'package:netflix_clone/src/services/moviedb/models/get_movies.dart';
 
 import 'src/widgets/widgets.dart';
 
@@ -10,30 +14,56 @@ class MoviesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            SafeArea(child: SizedBox(height: UISize.topBarHeight(context))),
-            const HomeHeader(),
-            const Section(),
-            const Section(),
-            const Section(),
-          ],
-        ),
-      ),
+      body: Builder(builder: (context) {
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              SafeArea(child: SizedBox(height: UISize.topBarHeight(context))),
+              const HomeHeader(),
+              const Section(GetMovies.nowPlaying),
+              const Section(GetMovies.upcoming),
+              const Section(GetMovies.popular),
+              const Section(GetMovies.topRated),
+            ],
+          ),
+        );
+      }),
     );
   }
 }
 
 class Section extends StatelessWidget {
-  final String? label;
-  const Section({
-    Key? key,
-    this.label,
-  }) : super(key: key);
+  final GetMovies? getMovies;
+  const Section(this.getMovies, [Key? key]) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider<MovieDbManagerCubit>(
+      create: (context) => MovieDbManagerCubit(),
+      child: SectionView(getMovies),
+    );
+  }
+}
+
+class SectionView extends StatefulWidget {
+  final GetMovies? getMovies;
+  const SectionView(this.getMovies, [Key? key]) : super(key: key);
+
+  @override
+  State<SectionView> createState() => _SectionViewState();
+}
+
+class _SectionViewState extends State<SectionView> {
+  MoviesDAO? movies;
+  @override
+  void initState() {
+    super.initState();
+    context.read<MovieDbManagerCubit>().getMovies(widget.getMovies!);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    movies = context.watch<MovieDbManagerCubit>().state;
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: UISize.appHorizontalPadding,
@@ -41,13 +71,13 @@ class Section extends StatelessWidget {
       ),
       child: SizedBox(
         width: double.infinity,
-        height: context.height40 * 0.85,
+        height: context.height40 * 1,
         child: Column(
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(label ?? UIText.section),
+                Text(widget.getMovies?.label ?? UIText.section),
                 const Text(UIText.seeAll),
               ],
             ),
@@ -56,34 +86,42 @@ class Section extends StatelessWidget {
                 clipBehavior: Clip.none,
                 cacheExtent: 500,
                 scrollDirection: Axis.horizontal,
-                itemCount: 10,
+                itemCount: movies?.results?.length ?? 0,
                 itemBuilder: (context, index) {
+                  var movie = movies?.results?[index];
                   return Padding(
                     padding: const EdgeInsets.only(
                       top: UISize.appHorizontalPadding * 0.7,
                       bottom: UISize.appHorizontalPadding * 0.7,
                       right: UISize.appHorizontalPadding * 0.3,
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        SizedBox(
-                          height: context.height20 * 0.9,
-                          width: context.width30 * 1.15,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(
-                                UISize.borderRadiusSmall,
-                              ),
-                              color: Colors.amber,
+                    child: SizedBox(
+                      width: context.width30 * 1.15,
+                      height: context.height20 * 1.2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          SizedBox(
+                            // height: context.height20 * 1.2,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.network(
+                                  movie?.posterPath?.asImageURL ?? ""),
                             ),
                           ),
-                        ),
-                        Text("Movie Title"),
-                        Text("Movie Subtitle"),
-                        Text("*****"),
-                      ],
+                          Text(
+                            movie?.title ??
+                                movie?.originalTitle ??
+                                "Movie Title",
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
+                          ),
+                          // Text(movie?.overview ?? "description"),
+                          Text(movie?.voteCount.toString() ?? ""),
+                          Text(movie?.voteAverage.toString() ?? ""),
+                        ],
+                      ),
                     ),
                   );
                 },

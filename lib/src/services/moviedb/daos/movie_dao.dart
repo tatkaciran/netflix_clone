@@ -93,4 +93,9 @@ class MovieDAO {
       _$MovieDAOFromJson(json);
 
   Map<String, dynamic> toJson() => _$MovieDAOToJson(this);
+
+  @override
+  String toString() {
+    return toJson().toString();
+  }
 }
